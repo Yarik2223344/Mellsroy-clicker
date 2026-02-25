@@ -1,0 +1,710 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MELSTROY: ULTIMATE CLICKER</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Russo+One&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #FFD700;
+            --primary-glow: rgba(255, 215, 0, 0.6);
+            --accent: #bc13fe;
+            --accent-glow: rgba(188, 19, 254, 0.6);
+            --bg-dark: #050505;
+            --glass: rgba(20, 20, 20, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+            --success: #00ff9d;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            outline: none;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-dark);
+            font-family: 'Montserrat', sans-serif;
+            color: var(--text);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            /* Dynamic Background */
+            background: radial-gradient(circle at 50% 30%, #1a0b2e 0%, #000000 70%);
+        }
+
+        /* Ambient Background Animation */
+        .ambient-light {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            top: -200px;
+            left: 50%;
+            transform: translateX(-50%);
+            opacity: 0.4;
+            animation: pulseLight 4s infinite alternate;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes pulseLight {
+            0% { transform: translateX(-50%) scale(1); opacity: 0.3; }
+            100% { transform: translateX(-50%) scale(1.2); opacity: 0.5; }
+        }
+
+        /* --- HEADER --- */
+        header {
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+        }
+
+        .balance-container {
+            background: var(--glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            padding: 10px 25px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 200px;
+            transform: skewX(-5deg);
+        }
+
+        .balance-label {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: #aaa;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-family: 'Russo One', sans-serif;
+            font-size: 36px;
+            color: var(--primary);
+            text-shadow: 0 0 20px var(--primary-glow);
+            transform: skewX(5deg); /* Counter skew */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stats-pill {
+            background: rgba(0, 255, 157, 0.1);
+            border: 1px solid var(--success);
+            color: var(--success);
+            padding: 5px 15px;
+            border-radius: 50px;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 0 10px rgba(0, 255, 157, 0.2);
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* --- MAIN STAGE --- */
+        .stage {
+            flex: 1;
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 5;
+            perspective: 1000px;
+        }
+
+        .click-area {
+            position: relative;
+            width: 320px;
+            height: 320px;
+            cursor: pointer;
+            transition: transform 0.1s cubic-bezier(0.34, 1.56, 0.64, 1);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .click-area:active {
+            transform: scale(0.95);
+        }
+
+        .click-area.clicked {
+            animation: shake 0.3s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        /* High Quality SVG Character */
+        .character-svg {
+            width: 100%;
+            height: 100%;
+            filter: drop-shadow(0 20px 30px rgba(0,0,0,0.6));
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        /* --- SHOP PANEL --- */
+        .shop-panel {
+            position: relative;
+            z-index: 20;
+            height: 40vh;
+            background: rgba(10, 10, 10, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--glass-border);
+            border-radius: 30px 30px 0 0;
+            box-shadow: 0 -20px 50px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .shop-header {
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .shop-title {
+            font-family: 'Russo One', sans-serif;
+            font-size: 20px;
+            text-transform: uppercase;
+            background: linear-gradient(90deg, #fff, #aaa);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .shop-grid {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 15px;
+        }
+
+        /* Scrollbar */
+        .shop-grid::-webkit-scrollbar { width: 6px; }
+        .shop-grid::-webkit-scrollbar-track { background: transparent; }
+        .shop-grid::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        /* Shop Card */
+        .card {
+            background: linear-gradient(145deg, #1a1a1a, #111);
+            border: 1px solid #333;
+            border-radius: 16px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 4px; height: 100%;
+            background: var(--accent);
+            opacity: 0.5;
+            transition: opacity 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            border-color: #555;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .card:hover::before { opacity: 1; }
+
+        .card.disabled {
+            opacity: 0.5;
+            filter: grayscale(1);
+            pointer-events: none;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            background: #222;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            border: 1px solid #333;
+        }
+
+        .card-info { flex: 1; }
+
+        .card-name {
+            font-weight: 800;
+            font-size: 14px;
+            color: #fff;
+            margin-bottom: 4px;
+        }
+
+        .card-desc {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .card-cost {
+            font-family: 'Russo One', sans-serif;
+            color: var(--primary);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .card-lvl {
+            font-size: 10px;
+            background: #333;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #aaa;
+        }
+
+        /* --- PARTICLES & FX --- */
+        .particle {
+            position: absolute;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 100;
+        }
+
+        .floating-text {
+            position: absolute;
+            font-family: 'Russo One', sans-serif;
+            font-size: 24px;
+            color: #fff;
+            pointer-events: none;
+            z-index: 100;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            animation: floatUp 1s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+        }
+
+        .floating-text.crit {
+            color: var(--primary);
+            font-size: 40px;
+            text-shadow: 0 0 20px var(--primary);
+            z-index: 101;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.8); opacity: 0; }
+            20% { transform: translateY(-20px) scale(1.2); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
+        }
+
+        /* Overlay Message */
+        .overlay-msg {
+            position: fixed;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-family: 'Russo One', sans-serif;
+            font-size: 80px;
+            color: #fff;
+            text-shadow: 0 0 30px var(--accent);
+            z-index: 200;
+            pointer-events: none;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            text-align: center;
+            white-space: nowrap;
+        }
+        .overlay-msg.active { transform: translate(-50%, -50%) scale(1) rotate(-5deg); }
+
+    </style>
+</head>
+<body>
+
+    <div class="ambient-light"></div>
+
+    <header>
+        <div class="balance-container">
+            <div class="balance-label">БАЛАНС</div>
+            <div class="balance-amount">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#FFD700" stroke-width="2"/>
+                    <path d="M12 6V18M8 10H16" stroke="#FFD700" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span id="score">0</span>
+            </div>
+            <div class="stats-pill">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                    <path d="M13 2L3 14H12L11 22L21 10H12L13 2Z"/>
+                </svg>
+                <span id="cps">0</span> / сек
+            </div>
+        </div>
+    </header>
+
+    <main class="stage">
+        <div class="click-area" id="clicker">
+            <!-- Detailed SVG Character -->
+            <svg class="character-svg" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="suitGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#2c3e50;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#000000;stop-opacity:1" />
+                    </linearGradient>
+                    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#BF953F;stop-opacity:1" />
+                        <stop offset="25%" style="stop-color:#FCF6BA;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#B38728;stop-opacity:1" />
+                        <stop offset="75%" style="stop-color:#FBF5B7;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#AA771C;stop-opacity:1" />
+                    </linearGradient>
+                    <filter id="glow">
+                        <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
+                        <feMerge>
+                            <feMergeNode in="coloredBlur"/>
+                            <feMergeNode in="SourceGraphic"/>
+                        </feMerge>
+                    </filter>
+                </defs>
+
+                <!-- Shadow -->
+                <ellipse cx="200" cy="380" rx="100" ry="20" fill="rgba(0,0,0,0.5)" filter="url(#glow)"/>
+
+                <!-- Body -->
+                <path d="M120,400 L120,250 Q120,220 200,220 Q280,220 280,250 L280,400 Z" fill="url(#suitGrad)" stroke="#111" stroke-width="2"/>
+                <!-- Shirt -->
+                <path d="M180,230 L200,350 L220,230 Z" fill="#fff"/>
+                <!-- Tie -->
+                <path d="M200,240 L215,320 L200,340 L185,320 Z" fill="#D4AF37"/>
+
+                <!-- Head Group -->
+                <g transform="translate(0, -10)">
+                    <!-- Neck -->
+                    <rect x="175" y="200" width="50" height="40" fill="#d4a373"/>
+                    
+                    <!-- Face Shape -->
+                    <path d="M150,150 Q150,220 200,230 Q250,220 250,150 Q250,80 200,80 Q150,80 150,150" fill="#f1c27d"/>
+                    
+                    <!-- Hair -->
+                    <path d="M145,140 Q140,60 200,50 Q260,60 255,140 Q260,100 200,90 Q140,100 145,140" fill="#1a1a1a"/>
+                    <path d="M190,60 L200,90 L210,60" fill="#1a1a1a"/> <!-- Spike -->
+
+                    <!-- Sunglasses -->
+                    <g filter="url(#glow)">
+                        <path d="M155,130 L195,130 L190,160 L150,160 Z" fill="#000" stroke="#333" stroke-width="1"/>
+                        <path d="M205,130 L245,130 L250,160 L210,160 Z" fill="#000" stroke="#333" stroke-width="1"/>
+                        <line x1="195" y1="140" x2="205" y2="140" stroke="#333" stroke-width="2"/>
+                        <!-- Reflection -->
+                        <path d="M160,135 L185,135 L182,145 L157,145 Z" fill="rgba(255,255,255,0.2)"/>
+                        <path d="M210,135 L235,135 L238,145 L213,145 Z" fill="rgba(255,255,255,0.2)"/>
+                    </g>
+
+                    <!-- Mouth -->
+                    <path d="M180,190 Q200,205 220,190" fill="none" stroke="#a67c52" stroke-width="3" stroke-linecap="round"/>
+                    
+                    <!-- Earring -->
+                    <circle cx="145" cy="160" r="4" fill="url(#goldGrad)"/>
+                </g>
+
+                <!-- Gold Chain -->
+                <path d="M160,240 Q200,280 240,240" fill="none" stroke="url(#goldGrad)" stroke-width="6" stroke-linecap="round"/>
+                <circle cx="200" cy="270" r="8" fill="url(#goldGrad)"/>
+
+                <!-- Hands (Thumbs Up / Money Gesture) -->
+                <circle cx="130" cy="260" r="25" fill="#f1c27d" stroke="#d4a373" stroke-width="2"/>
+                <circle cx="270" cy="260" r="25" fill="#f1c27d" stroke="#d4a373" stroke-width="2"/>
+            </svg>
+        </div>
+    </main>
+
+    <aside class="shop-panel">
+        <div class="shop-header">
+            <div class="shop-title">Магазин Успеха</div>
+            <div style="font-size: 12px; color: #666;">LVL <span id="level" style="color:#fff">1</span></div>
+        </div>
+        <div class="shop-grid" id="shop">
+            <!-- Items injected via JS -->
+        </div>
+    </aside>
+
+    <div class="overlay-msg" id="overlayMsg">TOP!</div>
+
+    <script>
+        // --- CONFIG ---
+        const GAME = {
+            money: 0,
+            clickPower: 1,
+            autoIncome: 0,
+            level: 1,
+            items: [
+                { id: 'bot', name: 'Бот-комментатор', baseCost: 50, income: 2, icon: '🤖', desc: 'Спамит "ТОП" в чат', count: 0 },
+                { id: 'donat', name: 'Донат 500р', baseCost: 250, income: 10, icon: '💸', desc: 'Мелкие донаты', count: 0 },
+                { id: 'casino', name: 'Реклама Казино', baseCost: 1000, income: 45, icon: '🎰', desc: 'Пассивный доход', count: 0 },
+                { id: 'car', name: 'Аренда Ламбо', baseCost: 5000, income: 150, icon: '🏎️', desc: 'Для стримов', count: 0 },
+                { id: 'girl', name: 'Модель для стрима', baseCost: 20000, income: 500, icon: '💃', desc: 'Повышает хайп', count: 0 },
+                { id: 'house', name: 'Пентхаус в Москва-Сити', baseCost: 100000, income: 2000, icon: '🏢', desc: 'Элитная недвижимость', count: 0 },
+                { id: 'island', name: 'Остров в Дубае', baseCost: 1000000, income: 15000, icon: '🏝️', desc: 'Личное государство', count: 0 }
+            ]
+        };
+
+        const PHRASES = ["DONAT!", "KINGS!", "HYPE!", "TOP!", "LUXURY!", "POG!", "MONEY!"];
+        
+        // --- AUDIO ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        function playSound(type) {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            const now = audioCtx.currentTime;
+
+            if (type === 'click') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(100, now + 0.15);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            } else if (type === 'buy') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.linearRampToValueAtTime(800, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            } else if (type === 'crit') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(200, now);
+                osc.frequency.linearRampToValueAtTime(600, now + 0.2);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.linearRampToValueAtTime(0, now + 0.4);
+                osc.start(now);
+                osc.stop(now + 0.4);
+            }
+        }
+
+        // --- CORE ---
+        const elScore = document.getElementById('score');
+        const elCps = document.getElementById('cps');
+        const elLevel = document.getElementById('level');
+        const elShop = document.getElementById('shop');
+        const elClicker = document.getElementById('clicker');
+        const elOverlay = document.getElementById('overlayMsg');
+
+        function fmt(num) {
+            if (num >= 1e9) return (num / 1e9).toFixed(2) + 'B';
+            if (num >= 1e6) return (num / 1e6).toFixed(2) + 'M';
+            if (num >= 1e3) return (num / 1e3).toFixed(1) + 'k';
+            return Math.floor(num);
+        }
+
+        function updateUI() {
+            elScore.innerText = fmt(GAME.money);
+            elCps.innerText = fmt(GAME.autoIncome);
+            elLevel.innerText = GAME.level;
+            renderShop();
+        }
+
+        function getCost(item) {
+            return Math.floor(item.baseCost * Math.pow(1.4, item.count));
+        }
+
+        function renderShop() {
+            elShop.innerHTML = '';
+            GAME.items.forEach(item => {
+                const cost = getCost(item);
+                const canBuy = GAME.money >= cost;
+                
+                const card = document.createElement('div');
+                card.className = `card ${canBuy ? '' : 'disabled'}`;
+                card.onclick = () => buyItem(item.id);
+                
+                card.innerHTML = `
+                    <div class="card-icon">${item.icon}</div>
+                    <div class="card-info">
+                        <div class="card-name">${item.name}</div>
+                        <div class="card-desc">${item.desc}</div>
+                        <div class="card-footer">
+                            <div class="card-cost">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><path d="M12 6v12M8 10h8"/></svg>
+                                ${fmt(cost)}
+                            </div>
+                            <div class="card-lvl">LVL ${item.count}</div>
+                        </div>
+                    </div>
+                `;
+                elShop.appendChild(card);
+            });
+        }
+
+        function buyItem(id) {
+            const item = GAME.items.find(i => i.id === id);
+            const cost = getCost(item);
+            if (GAME.money >= cost) {
+                GAME.money -= cost;
+                item.count++;
+                GAME.autoIncome += item.income;
+                GAME.level = 1 + Math.floor(GAME.items.reduce((a,b)=>a+b.count,0) / 5);
+                playSound('buy');
+                updateUI();
+                saveGame();
+            }
+        }
+
+        // --- FX SYSTEM ---
+        function spawnParticles(x, y, count = 10, color = '#FFD700') {
+            for (let i = 0; i < count; i++) {
+                const p = document.createElement('div');
+                p.className = 'particle';
+                document.body.appendChild(p);
+                
+                const size = Math.random() * 8 + 4;
+                p.style.width = `${size}px`;
+                p.style.height = `${size}px`;
+                p.style.background = color;
+                p.style.left = `${x}px`;
+                p.style.top = `${y}px`;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = Math.random() * 100 + 50;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                p.animate([
+                    { transform: 'translate(0,0) scale(1)', opacity: 1 },
+                    { transform: `translate(${tx}px, ${ty}px) scale(0)`, opacity: 0 }
+                ], {
+                    duration: 600 + Math.random() * 400,
+                    easing: 'cubic-bezier(0, .9, .57, 1)'
+                }).onfinish = () => p.remove();
+            }
+        }
+
+        function spawnText(x, y, text, isCrit = false) {
+            const el = document.createElement('div');
+            el.className = `floating-text ${isCrit ? 'crit' : ''}`;
+            el.innerText = text;
+            el.style.left = `${x}px`;
+            el.style.top = `${y - 50}px`;
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 1000);
+        }
+
+        function triggerOverlay() {
+            if (Math.random() > 0.96) {
+                const txt = PHRASES[Math.floor(Math.random() * PHRASES.length)];
+                elOverlay.innerText = txt;
+                elOverlay.classList.add('active');
+                playSound('crit');
+                setTimeout(() => elOverlay.classList.remove('active'), 500);
+            }
+        }
+
+        // --- INPUT HANDLING ---
+        function handleInput(e) {
+            e.preventDefault();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+            // Logic
+            const isCrit = Math.random() > 0.9;
+            const amount = isCrit ? GAME.clickPower * 5 : GAME.clickPower;
+            GAME.money += amount;
+
+            // Visuals
+            playSound(isCrit ? 'crit' : 'click');
+            elClicker.classList.add('clicked');
+            setTimeout(() => elClicker.classList.remove('clicked'), 300);
+            
+            spawnParticles(clientX, clientY, isCrit ? 30 : 15, isCrit ? '#FFD700' : '#fff');
+            spawnText(clientX, clientY, `+${fmt(amount)}`, isCrit);
+            triggerOverlay();
+            
+            updateUI();
+        }
+
+        elClicker.addEventListener('mousedown', handleInput);
+        elClicker.addEventListener('touchstart', handleInput, {passive: false});
+
+        // --- LOOP & SAVE ---
+        setInterval(() => {
+            if (GAME.autoIncome > 0) {
+                GAME.money += GAME.autoIncome / 10;
+                updateUI();
+                // Occasional auto particle
+                if(Math.random() > 0.8) {
+                    const rect = elClicker.getBoundingClientRect();
+                    spawnParticles(rect.left + rect.width/2, rect.top, 2, '#00ff9d');
+                }
+            }
+        }, 100);
+
+        function saveGame() {
+            localStorage.setItem('melstroyUltimate', JSON.stringify({
+                money: GAME.money,
+                items: GAME.items.map(i => ({id: i.id, count: i.count}))
+            }));
+        }
+
+        function loadGame() {
+            const s = localStorage.getItem('melstroyUltimate');
+            if(s) {
+                const d = JSON.parse(s);
+                GAME.money = d.money || 0;
+                d.items.forEach(si => {
+                    const i = GAME.items.find(x => x.id === si.id);
+                    if(i) { i.count = si.count; GAME.autoIncome += i.income * si.count; }
+                });
+            }
+            updateUI();
+        }
+
+        setInterval(saveGame, 15000);
+        loadGame();
+
+    </script>
+</body>
+</html>
+
